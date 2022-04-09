@@ -15,7 +15,7 @@ class transaksiController extends Controller
     public function index(Request $request) {
         $search = $request->search;
         $transaksis = transaksi::when($search, function($query, $search){
-            return $query->where('nama_pelanggan', 'like', "%{$search}%");
+            return $query->where('id_pelanggan', 'like', "%{$search}%");
         })->paginate(25);
         return view('transaksi.transaksi', [
             'transaksis'=>$transaksis,
@@ -40,51 +40,74 @@ class transaksiController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'tanggal' => 'required',
+            'jumlah'=> 'required',
+            'harga'=> 'required'
+        ]);
+        transaksi::create($request->all());
 
-    /**
+        return redirect('transaksi')->with('success', 'Data transaksi berhasil ditambahkan');
+    }
+     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\transaksi  $transaksi
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(transaksi $transaksi)
     {
-        //
+        $transaksi = transaksi::find($transaksi);
+        return view('/transaksi.detail', compact('transaksi'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\transaksi  $transaksi
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(transaksi $transaksi)
     {
-        //
+        $transaksi = transaksi::find($transaksi);
+        return view('/transaksi.edit', compact('transaksi'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\transaksi  $transaksi
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, transaksi $transaksi)
     {
-        //
+        $request->validate([
+            'tanggal' => 'required',
+            'jumlah'=> 'required',
+            'harga'=> 'required'
+        ]);
+
+        $transaksi->tanggal = $request->tanggal;
+        $transaksi->jumlah = $request->jumlah;
+        $transaksi->harga = $request->harga;
+        $transaksi->save();
+
+        //jika data berhasil diupdate, akan kembali ke halaman utama
+        return redirect('/transaksi')
+            ->with('success', 'Data transaksi Berhasil Diupdate');
     }
+
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\transaksi $transaksi
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(transaksi $transaksi)
     {
-        //
+        $transaksi->delete();
+        return redirect('/transaksi')->with('success', 'Data transaksi berhasil dihapus');
     }
 }
