@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\transaksi;
+use Illuminate\Support\Facades\DB;
 class transaksiController extends Controller
 {
     /**
@@ -11,9 +12,14 @@ class transaksiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        //
+    public function index(Request $request) {
+        $search = $request->search;
+        $transaksis = transaksi::when($search, function($query, $search){
+            return $query->where('nama_pelanggan', 'like', "%{$search}%");
+        })->paginate(25);
+        return view('transaksi.transaksi', [
+            'transaksis'=>$transaksis,
+        ]);
     }
 
     /**
@@ -23,7 +29,7 @@ class transaksiController extends Controller
      */
     public function create()
     {
-        //
+        return view('/transaksi.create');
     }
 
     /**
